@@ -1,0 +1,51 @@
+.results-page {
+  min-height: 100vh;
+  background: #f4f6f8;
+  padding: 40px;
+}
+
+.results-page h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.constituency-select {
+  display: block;
+  margin: 0 auto 30px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #aaa;
+}
+
+.result-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.candidate-name {
+  width: 150px;
+}
+
+.bar-container {
+  flex: 1;
+  background: #ddd;
+  margin: 0 10px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.bar {
+  height: 20px;
+  background: #138808;
+}
+
+.vote-count {
+  width: 90px;
+}
+
+.info-text {
+  text-align: center;
+  margin-top: 30px;
+  font-weight: 500;
+}

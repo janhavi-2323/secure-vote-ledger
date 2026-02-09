@@ -1,0 +1,16 @@
+# Node modules
+node_modules/
+
+# React build
+build/
+
+# Environment files
+.env
+
+# Java
+target/
+*.class
+
+# OS files
+.DS_Store
+Thumbs.db

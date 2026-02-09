@@ -1,0 +1,57 @@
+package com.example.securevoteledger.service;
+
+import com.example.securevoteledger.entity.User;
+import com.example.securevoteledger.repository.UserRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+public class UserService {
+
+    private final UserRepository userRepository;
+
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public User register(String username, String password, String role) {
+
+        Optional<User> existingUser = userRepository.findByUsername(username);
+        if (existingUser.isPresent()) {
+            throw new RuntimeException("User already exists");
+        }
+        User user = new User(username, password, role);
+        return userRepository.save(user);
+    }
+
+    public User login(String username, String password) {
+
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            return null;
+        }
+        User user = userOpt.get();
+        if (!user.getPassword().equals(password)) {
+            return null;
+        }
+        return user;
+    }
+
+    public boolean hasUserVoted(String username) {
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            return false;
+        }
+        return userOpt.get().isHasVoted();
+    }
+
+    public void markUserAsVoted(String username) {
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setHasVoted(true);
+            userRepository.save(user);
+        }
+    }
+}
