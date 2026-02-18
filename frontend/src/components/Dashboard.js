@@ -4,9 +4,11 @@ import api from "../services/api";
 import "../styles/Dashboard.css";
 import {PieChart,Pie,Tooltip,Cell,ResponsiveContainer} from "recharts";
 
+
 function Dashboard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
+  const [validationResult, setValidationResult] = useState(null);
 
   useEffect(() => {
     const role = localStorage.getItem("role");
@@ -30,6 +32,19 @@ function Dashboard() {
       console.error("Error fetching stats", error);
     }
   };
+  const validateChain = async () => {
+  try {
+    const role = localStorage.getItem("role");
+
+    const res = await api.get(`/admin/validate-chain?role=${role}`);
+
+    setValidationResult(res.data);
+
+  } catch (error) {
+    setValidationResult("❌ Validation failed.");
+  }
+};
+
 
   return (
     <div className="dashboard-page">
@@ -66,7 +81,7 @@ function Dashboard() {
         )
       )}
     </div>
-
+    
     {/* Pie Chart */}
     <div className="chart-container">
       <h3>Overall Vote Distribution</h3>
@@ -99,6 +114,22 @@ function Dashboard() {
         </PieChart>
       </ResponsiveContainer>
     </div>
+    <div className="validation-section">
+        <button className="validate-btn" onClick={validateChain}>
+          🔍 Validate Blockchain Integrity
+        </button>
+
+        {validationResult && (
+          <p
+            className={`validation-result ${
+              validationResult.includes("valid") ? "success" : "error"
+            }`}
+          >
+            {validationResult}
+          </p>
+        )}
+    </div>
+
   </>
 )}
 

@@ -27,51 +27,50 @@ public class VoteController {
 
     @Transactional
     @PostMapping("/vote")
-    public ResponseEntity<?> castVote(@RequestBody Map<String, String> body) {
+public ResponseEntity<?> castVote(@RequestBody Map<String, String> body) {
 
-        String username = body.get("username");
-        String constituency = body.get("constituency");
-        String candidate = body.get("candidate");
+    String username = body.get("username");
+    String constituency = body.get("constituency");
+    String candidate = body.get("candidate");
 
-        if (username == null || constituency == null || candidate == null) {
-            return ResponseEntity.badRequest().body("Invalid vote data");
-        }
+    if (username == null || constituency == null || candidate == null) {
+        return ResponseEntity.badRequest().body("Invalid vote data");
+    }
 
-        // 🔐 CHECK IF USER HAS ALREADY VOTED
-        if (userService.hasUserVoted(username)) {
-            return ResponseEntity.status(403).body("User has already voted");
-        }
+    if (voteRepository.existsByUsername(username)) {
+        return ResponseEntity.status(403).body("User has already voted");
+    }
 
-        // ✅ CREATE VOTE RECORD
+    // Get last vote
+        VoteRecord lastVote = voteRepository.findAll().stream()
+                .reduce((first, second) -> second)
+                .orElse(null);
+
+        String previousHash = (lastVote == null) ? "0" : lastVote.getVoteHash();
+
+// Generate current hash
+        String data = username + constituency + candidate + previousHash;
+        String currentHash = HashUtil.generateHash(data);
+
+// Create new block
         VoteRecord voteRecord = new VoteRecord(
                 username,
                 constituency,
                 candidate,
-                "hash_" + System.currentTimeMillis()
-        );
+                previousHash,
+                currentHash
+                );
 
-        // ✅ SAVE VOTE TO DATABASE
+// Save once
         voteRepository.save(voteRecord);
 
-        // ✅ MARK USER AS VOTED
-        userService.markUserAsVoted(username);
-        // 🔗 Get previous hash
-        String previousHash = voteRepository.findAll().stream()
-        .reduce((first, second) -> second)
-        .map(VoteRecord::getVoteHash)
-        .orElse("0");
 
-// 🔐 Generate new vote hash
-        String data = username + constituency + candidate + previousHash;
-        String voteHash = HashUtil.generateHash(data);
+    // ✅ Mark user voted
+    userService.markUserAsVoted(username);
 
-// 💾 Save vote record
-        VoteRecord votes =new VoteRecord(username, constituency, candidate, voteHash);
+    return ResponseEntity.ok("Vote cast successfully");
+}
 
-        voteRepository.save(votes);
-
-        return ResponseEntity.ok("Vote cast successfully");
-    }
 
   @GetMapping("/results")
 public ResponseEntity<?> getResultsByConstituency(
@@ -147,7 +146,44 @@ public ResponseEntity<?> getAdminStats(@RequestParam String role) {
     response.put("leadingCandidate", leadingCandidate);
 
     return ResponseEntity.ok(response);
+
 }
+@GetMapping("/admin/validate-chain")
+public ResponseEntity<?> validateChain(@RequestParam String role) {
+
+    if (!"ADMIN".equals(role)) {
+        return ResponseEntity.status(403)
+                .body("Access denied. Admin only.");
+    }
+
+    List<VoteRecord> votes = voteRepository.findAll();
+
+   String previousHash = "0";
+
+        for (VoteRecord vote : votes) {
+
+                if (!vote.getPreviousHash().equals(previousHash)) {
+                return ResponseEntity.ok("❌ Blockchain broken (previous hash mismatch)");
+    }
+
+    String recalculatedHash = HashUtil.generateHash(
+            vote.getUsername()
+            + vote.getConstituency()
+            + vote.getCandidate()
+            + vote.getPreviousHash()
+    );
+
+    if (!vote.getVoteHash().equals(recalculatedHash)) {
+        return ResponseEntity.ok("❌ Blockchain tampered (hash mismatch)");
+    }
+
+    previousHash = vote.getVoteHash();
+}
+
+
+    return ResponseEntity.ok("✅ Blockchain is valid and untampered.");
+}
+
 
 
 }
