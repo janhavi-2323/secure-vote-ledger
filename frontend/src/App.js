@@ -6,6 +6,7 @@ import Register from "./components/Register";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import Vote from "./components/Vote";
 import Results from "./components/Results";
+import Dashboard from "./components/Dashboard";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/results" element={<Results />} />
+        <Route path="/dashboard" element={<Dashboard />} />
 
         {/* Protected Routes */}
         <Route
@@ -28,6 +30,7 @@ function App() {
         />
 
       </Routes>
+
     </Router>
   );
 }
