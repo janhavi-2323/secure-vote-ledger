@@ -1,16 +1,21 @@
-# Node modules
+# Node
 node_modules/
-
-# React build
 build/
+dist/
 
-# Environment files
-.env
+# Logs
+*.log
 
-# Java
+# Backend
 target/
 *.class
 
-# OS files
+# IDE
+.idea/
+.vscode/
+
+# OS
 .DS_Store
-Thumbs.db
+
+# Ethereum
+*.key
