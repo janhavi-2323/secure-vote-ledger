@@ -45,21 +45,22 @@
 /* Candidate card */
 .candidate-card {
   background: white;
-  border-radius: 12px;
   padding: 25px;
-  text-align: center;
+  border-radius: 18px;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
   transition: all 0.3s ease;
-  border: 3px solid transparent;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  text-align: center;
 }
 
 .candidate-card:hover {
   transform: translateY(-6px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
 }
 
 .candidate-card.selected {
-  transform: scale(1.05);
+  border: 2px solid #138808;
+  background: #f0fff4;
 }
 
 /* Party symbol */
@@ -69,6 +70,7 @@
 }
 
 /* Vote button */
+
 .vote-btn {
   margin-top: 30px;
   padding: 12px 35px;
@@ -80,6 +82,10 @@
   cursor: pointer;
 }
 
+.vote-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(19, 136, 8, 0.4);
+}
 .vote-btn:disabled {
   background: #999;
   cursor: not-allowed;

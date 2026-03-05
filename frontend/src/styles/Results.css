@@ -73,7 +73,7 @@
   height: 24px;
   background: linear-gradient(90deg, #ff9933, #138808);
   border-radius: 20px;
-  animation: growBar 1s ease forwards;
+  animation: growBar 1s ease forwards; 
 }
 
 .vote-count {
