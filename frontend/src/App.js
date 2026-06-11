@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -7,19 +7,31 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import Vote from "./components/Vote";
 import Results from "./components/Results";
 import Dashboard from "./components/Dashboard";
+import BlockchainExplorer from "./components/BlockchainExplorer";
+import Navbar from "./components/Navbar";
+import AdminRoute from "./components/AdminRoute";
 
-function App() {
+function AppContent() {
+
+  const role = localStorage.getItem("role");
+  const location = useLocation();
+
+  const hideNavbarRoutes = ["/login", "/register"];
+
+  const showNavbar =
+    role === "ADMIN" && !hideNavbarRoutes.includes(location.pathname);
+
   return (
-    <Router>
+    <>
+      {showNavbar && <Navbar />}
+
       <Routes>
 
-        {/* Public Routes */}
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/results" element={<Results />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/" element={<Navigate to="/login" />} />
 
-        {/* Protected Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
         <Route
           path="/vote"
           element={
@@ -29,67 +41,44 @@ function App() {
           }
         />
 
-      </Routes>
+        <Route
+          path="/dashboard"
+          element={
+            <AdminRoute>
+              <Dashboard />
+            </AdminRoute>
+          }
+        />
 
+        <Route
+          path="/results"
+          element={
+            <AdminRoute>
+              <Results />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/blockchain"
+          element={
+            <AdminRoute>
+              <BlockchainExplorer />
+            </AdminRoute>
+          }
+        />
+
+      </Routes>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
 
 export default App;
-
-
-
-// import React from "react";
-// import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
-// import Login from "./components/Login";
-// import Register from "./components/Register";
-// import Vote from "./components/Vote";
-// import Result from "./components/Result";
-// import AdminDashboard from "./components/AdminDashboard";
-// import Navbar from "./components/Navbar";
-// import ProtectedRoute from "./components/ProtectedRoute";
-
-// function App() {
-//   return (
-//     <Router>
-//       <Navbar />
-
-//       <Routes>
-//         {/* Public Route */}
-//         <Route path="/" element={<Login />} />
-//         <Route path="/register" element={<Register />} />
-
-//         {/* Protected Routes */}
-//         <Route
-//           path="/vote"
-//           element={
-//             <ProtectedRoute>
-//               <Vote />
-//             </ProtectedRoute>
-//           }
-//         />
-
-//         <Route
-//           path="/result"
-//           element={
-//             <ProtectedRoute>
-//               <Result />
-//             </ProtectedRoute>
-//           }
-//         />
-
-//         <Route
-//           path="/admin"
-//           element={
-//             <ProtectedRoute>
-//               <AdminDashboard />
-//             </ProtectedRoute>
-//           }
-//         />
-//       </Routes>
-//     </Router>
-//   );
-// }
-
-// export default App;
