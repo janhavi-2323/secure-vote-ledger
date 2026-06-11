@@ -1,5 +1,7 @@
 package com.example.securevoteledger.repository;
 
-public class ConstituencyRepository {
-    
+import com.example.securevoteledger.entity.Constituency;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ConstituencyRepository extends JpaRepository<Constituency, Long> {
 }
