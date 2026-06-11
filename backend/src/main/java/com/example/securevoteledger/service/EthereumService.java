@@ -25,10 +25,19 @@ public class EthereumService {
     private final String contractAddress;
 
     public EthereumService(
-            @Value("${ethereum.rpcUrl}") String rpcUrl,
-            @Value("${ethereum.privateKey}") String privateKey,
-            @Value("${ethereum.contractAddress}") String contractAddress
+        @Value("${ethereum.rpcUrl:}") String rpcUrl,
+        @Value("${ethereum.privateKey:}") String privateKey,
+        @Value("${ethereum.contractAddress:}") String contractAddress
     ) {
+
+        if (privateKey == null || privateKey.isBlank() || privateKey.equals("dummy")) {
+            System.out.println("Ethereum disabled - no valid private key");
+            this.web3j = null;
+            this.credentials = null;
+            this.contractAddress = null;
+            return;
+        }
+
         this.web3j = Web3j.build(new HttpService(rpcUrl));
         this.credentials = Credentials.create(privateKey);
         this.contractAddress = contractAddress;
@@ -49,7 +58,7 @@ public class EthereumService {
             String encodedFunction = FunctionEncoder.encode(function);
 
             RawTransactionManager transactionManager =
-                    new RawTransactionManager(web3j, credentials, 1337);
+                new RawTransactionManager(web3j, credentials);
 
             EthSendTransaction transactionResponse =
                     transactionManager.sendTransaction(
@@ -60,12 +69,13 @@ public class EthereumService {
                             BigInteger.ZERO
                     );
 
-            String txHash = transactionResponse.getTransactionHash();
-
-            if (txHash == null) {
-                System.out.println("❌ Transaction failed to send!");
+            if (transactionResponse.hasError()) {
+                System.out.println("❌ Ethereum Error: " +
+                        transactionResponse.getError().getMessage());
                 return;
             }
+
+            String txHash = transactionResponse.getTransactionHash();
 
             System.out.println("⏳ Waiting for transaction receipt...");
 
