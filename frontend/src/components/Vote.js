@@ -1,102 +1,55 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import "../styles/Vote.css";
 import api from "../services/api";   
 
-const constituencies = [
-  "Ahmedabad East",
-  "Surat West",
-  "Vadodara Central",
-];
-
-const candidates = [
-  {
-    id: 1,
-    name: "Candidate A",
-    party: "Party Alpha",
-    symbol: "🟢",
-    color: "#2e7d32",
-    constituency: "Ahmedabad East",
-  },
-  {
-    id: 2,
-    name: "Candidate B",
-    party: "Party Beta",
-    symbol: "🔵",
-    color: "#1565c0",
-    constituency: "Ahmedabad East",
-  },
-  {
-    id: 3,
-    name: "Candidate C",
-    party: "Party Gamma",
-    symbol: "🟠",
-    color: "#ef6c00",
-    constituency: "Ahmedabad East",
-  },
-  // Surat West
-  {
-    id: 4,
-    name: "Candidate D",
-    party: "Party Alpha",
-    symbol: "🟢",
-    color: "#2e7d32",
-    constituency: "Surat West",
-  },
-  {
-    id: 5,
-    name: "Candidate E",
-    party: "Party Beta",
-    symbol: "🔵",
-    color: "#1565c0",
-    constituency: "Surat West",
-  },
-  {
-    id: 6,
-    name: "Candidate F",
-    party: "Party Gamma",
-    symbol: "🟠",
-    color: "#ef6c00",
-    constituency: "Surat West",
-  },
-
-  // Vadodara Central
-  {
-    id: 7,
-    name: "Candidate G",
-    party: "Party Alpha",
-    symbol: "🟢",
-    color: "#2e7d32",
-    constituency: "Vadodara Central",
-  },
-  {
-    id: 8,
-    name: "Candidate H",
-    party: "Party Beta",
-    symbol: "🔵",
-    color: "#1565c0",
-    constituency: "Vadodara Central",
-  },
-  {
-    id: 9,
-    name: "Candidate I",
-    party: "Party Gamma",
-    symbol: "🟠",
-    color: "#ef6c00",
-    constituency: "Vadodara Central",
-  },
-];
-
-
 function Vote() {
   const [error, setError] = useState("");
+  const [candidates, setCandidates] = useState([]);
+  const [constituencies, setConstituencies] = useState([]);
   const [constituency, setConstituency] = useState("");
   const [selectedId, setSelectedId] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [receipt, setReceipt] = useState(null);
+  const [isElectionOpen, setIsElectionOpen] = useState(true);
 
-  const filteredCandidates = candidates.filter(
-    (c) => c.constituency === constituency
-  );
+  useEffect(() => {
+    fetchConstituencies();
+  }, []);
+
+  const fetchConstituencies = async () => {
+    try {
+      const res = await api.get("/constituencies");
+      setConstituencies(res.data);
+    } catch (error) {
+      console.error("Error fetching constituencies", error);
+    }
+  };
+  useEffect(() => {
+    const fetchElectionStatus = async () => {
+      try {
+        const res = await api.get("/election-status");
+        setIsElectionOpen(res.data);
+      } catch (error) {
+        console.error("Error fetching election status", error);
+      }
+    };
+    fetchElectionStatus();
+  }, []);
+  useEffect(() => {
+    if (constituency) {
+      fetchCandidates();
+    }
+  }, [constituency]);
+
+  const fetchCandidates = async () => {
+    try {
+      const res = await api.get(`/candidates?constituency=${constituency}`);
+      setCandidates(res.data);
+    } catch (error) {
+      console.error("Error fetching candidates", error);
+    }
+  };
+  const filteredCandidates = candidates;
 
   const selectedCandidate = candidates.find(
     (c) => c.id === selectedId
@@ -123,12 +76,13 @@ function Vote() {
 
     }
     catch (err) {
-        if (err.response && err.response.status === 403) {
-            setError("❌ You have already voted. Multiple voting is not allowed.");
-        } else {
-            setError("❌ Voting failed. Please try again.");
-        }
+      if (err.response && err.response.data) {
+          setError(`❌ ${err.response.data}`);
+      } 
+      else {
+          setError("❌ Voting failed. Please try again.");
       }
+    }
   };
 
 
@@ -151,8 +105,8 @@ function Vote() {
       >
         <option value="">Select Constituency</option>
         {constituencies.map((c) => (
-          <option key={c} value={c}>
-            {c}
+          <option key={c.id} value={c.name}>
+            {c.name}
           </option>
         ))}
       </select>
@@ -176,10 +130,14 @@ function Vote() {
       </div>
 
       {error && <p className="error-message">{error}</p>}
-      {/* Vote Button */}
+      {!isElectionOpen && (
+        <p className="error-message">
+          ❌ Election is currently closed. Voting is not allowed.
+        </p>
+      )}
       <button
         className="vote-btn"
-        disabled={!selectedId || !constituency}
+        disabled={!selectedId || !constituency || !isElectionOpen}
         onClick={handleVoteClick}
       >
         Cast Vote
