@@ -42,7 +42,6 @@
   width: 100%;
 }
 
-/* Candidate card */
 .candidate-card {
   background: white;
   padding: 25px;
@@ -70,7 +69,6 @@
 }
 
 /* Vote button */
-
 .vote-btn {
   margin-top: 30px;
   padding: 12px 35px;
@@ -178,4 +176,23 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@media (max-width: 768px) {
+
+  .stats-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .candidate-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .navbar {
+    flex-direction: column;
+    height: auto;
+    padding: 15px;
+  }
+
 }
