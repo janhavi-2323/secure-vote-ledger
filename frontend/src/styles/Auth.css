@@ -126,3 +126,22 @@ body {
   border-top: 1px solid #ddd;
   padding-top: 10px;
 }
+
+@media (max-width: 768px) {
+
+  .stats-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .candidate-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .navbar {
+    flex-direction: column;
+    height: auto;
+    padding: 15px;
+  }
+
+}
