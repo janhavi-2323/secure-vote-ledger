@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import {
   BarChart,
@@ -12,45 +11,42 @@ import {
 } from "recharts";
 import "../styles/Results.css";
 
-const constituencies = [
-  "Ahmedabad East",
-  "Surat West",
-  "Vadodara Central",
-];
-
 function Results() {
-  const navigate = useNavigate();
   const [selectedConstituency, setSelectedConstituency] = useState("");
   const [results, setResults] = useState([]);
+  const [constituencies, setConstituencies] = useState([]);
 
-  // 🔐 Admin protection
   useEffect(() => {
-    const role = localStorage.getItem("role");
-    if (role !== "ADMIN") {
-      alert("Access denied. Admin only.");
-      navigate("/vote");
-    }
+    fetchConstituencies();
   }, []);
 
+  const fetchConstituencies = async () => {
+    try {
+      const res = await api.get("/constituencies");
+      setConstituencies(res.data);
+    } catch (error) {
+      console.error("Error fetching constituencies", error);
+    }
+  };
+
   useEffect(() => {
+    const fetchResults = async () => {
+      try {
+        const role = localStorage.getItem("role");
+
+        const res = await api.get(
+          `/results?constituency=${selectedConstituency}&role=${role}`
+        );
+
+        setResults(res.data);
+      } catch (error) {
+        console.error("Error fetching results", error);
+      }
+    };
     if (selectedConstituency) {
       fetchResults();
     }
   }, [selectedConstituency]);
-
-  const fetchResults = async () => {
-    try {
-      const role = localStorage.getItem("role");
-
-      const res = await api.get(
-        `/results?constituency=${selectedConstituency}&role=${role}`
-      );
-
-      setResults(res.data);
-    } catch (error) {
-      console.error("Error fetching results", error);
-    }
-  };
 
   return (
     <div className="results-page">
@@ -63,8 +59,8 @@ function Results() {
       >
         <option value="">Select Constituency</option>
         {constituencies.map((c) => (
-          <option key={c} value={c}>
-            {c}
+          <option key={c.id} value={c.name}>
+            {c.name}
           </option>
         ))}
       </select>
