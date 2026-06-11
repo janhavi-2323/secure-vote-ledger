@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { GoogleLogin } from "@react-oauth/google";
 import api from "../services/api";
 import "../styles/Auth.css";
 
@@ -8,9 +7,24 @@ function Register() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
+  const [voterId, setVoterId] = useState("");
+  const [constituency, setConstituency] = useState("");
+  const [constituencies, setConstituencies] = useState([]);
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+    fetchConstituencies();
+  }, []);
+
+  const fetchConstituencies = async () => {
+    try {
+      const res = await api.get("/constituencies");
+      setConstituencies(res.data);
+    } catch (error) {
+      console.error("Error loading constituencies", error);
+    }
+  };
   const handleRegister = async (e) => {
     e.preventDefault();
     setMsg("");
@@ -19,6 +33,8 @@ function Register() {
       await api.post("/register", {
         username,
         password,
+        voterId,
+        constituency,
         role: "VOTER",
       });
 
@@ -26,19 +42,6 @@ function Register() {
       setTimeout(() => navigate("/"), 2000);
     } catch {
       setMsg("Registration failed. Please try again.");
-    }
-  };
-
-  const handleGoogleRegister = async (cred) => {
-    try {
-      await api.post("/google-register", {
-        token: cred.credential,
-      });
-
-      setMsg("Google registration successful!");
-      setTimeout(() => navigate("/"), 2000);
-    } catch {
-      setMsg("Google registration failed");
     }
   };
 
@@ -63,16 +66,30 @@ function Register() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+          <input
+            type="text"
+            placeholder="Voter ID"
+            value={voterId}
+            onChange={(e) => setVoterId(e.target.value)}
+            required
+          />
+          <select
+            value={constituency}
+            onChange={(e) => setConstituency(e.target.value)}
+            required
+          >
+            <option value="">Select Constituency</option>
+
+            {constituencies.map((c) => (
+              <option key={c.id} value={c.name}>
+                {c.name}
+              </option>
+            ))}
+
+          </select>
           <button type="submit">Register</button>
           {msg && <p className="error-text">{msg}</p>}
         </form>
-
-        <p className="subtitle">— OR —</p>
-
-        <GoogleLogin
-          onSuccess={handleGoogleRegister}
-          onError={() => setMsg("Google registration failed")}
-        />
 
         <p>
           Already registered? <Link to="/">Login here</Link>
