@@ -4,6 +4,8 @@ public class RegisterRequest {
     private String username;
     private String password;
     private String role;
+    private String voterId;
+    private String constituency;
 
     public RegisterRequest() {}
 
@@ -15,4 +17,10 @@ public class RegisterRequest {
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+
+    public String getVoterId() { return voterId; }
+    public void setVoterId(String voterId) { this.voterId = voterId; }
+
+    public String getConstituency() { return constituency; }
+    public void setConstituency(String constituency) { this.constituency = constituency; }
 }
