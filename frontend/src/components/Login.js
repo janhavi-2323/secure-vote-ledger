@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { GoogleLogin } from "@react-oauth/google";
 import api from "../services/api";
 import "../styles/Auth.css";
 
@@ -31,21 +30,6 @@ function Login() {
     }
   };
 
-  const handleGoogleLogin = async (cred) => {
-    try {
-      const res = await api.post("/google-login", {
-        token: cred.credential,
-      });
-
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("role", res.data.role);
-      localStorage.setItem("username", res.data.username);
-      navigate("/vote");
-    } catch {
-      setError("Google login failed");
-    }
-  };
-
   return (
     <div className="auth-container">
       <div className="auth-card">
@@ -70,13 +54,6 @@ function Login() {
           <button type="submit">Login</button>
           {error && <p className="error-text">{error}</p>}
         </form>
-
-        <p className="subtitle">— OR —</p>
-
-        <GoogleLogin
-          onSuccess={handleGoogleLogin}
-          onError={() => setError("Google login failed")}
-        />
 
         <p>
           New voter? <Link to="/register">Register here</Link>
