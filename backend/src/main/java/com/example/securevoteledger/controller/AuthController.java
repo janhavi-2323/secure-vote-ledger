@@ -26,7 +26,9 @@ public class AuthController {
         userService.register(
                 req.getUsername(),
                 req.getPassword(),
-                req.getRole() != null ? req.getRole() : "VOTER"
+                req.getRole() != null ? req.getRole() : "VOTER",
+                req.getVoterId(),
+                req.getConstituency()
         );
         return ResponseEntity.ok("Registered successfully");
     }
